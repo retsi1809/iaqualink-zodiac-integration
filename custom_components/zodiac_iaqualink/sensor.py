@@ -1,10 +1,8 @@
 """Sensor entities for the Zodiac heat pump."""
 from __future__ import annotations
-
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
-
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -15,8 +13,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-
-from .const import DOMAIN, HEATER_MODE_MAP, HEATER_STATUS_MAP
+from .const import DOMAIN, HEATER_MODE_MAP, HEATER_REASON_MAP, HEATER_STATUS_MAP
 from .coordinator import ZodiacDataUpdateCoordinator
 from .entity import ZodiacBaseEntity
 
@@ -24,7 +21,6 @@ from .entity import ZodiacBaseEntity
 @dataclass(frozen=True, kw_only=True)
 class ZodiacSensorDescription(SensorEntityDescription):
     """Sensor description plus a value extractor against coordinator.data."""
-
     value_fn: Callable[[dict[str, Any]], Any]
 
 
@@ -69,14 +65,16 @@ SENSORS: tuple[ZodiacSensorDescription, ...] = (
         translation_key="heater_mode",
         name="Heater mode",
         device_class=SensorDeviceClass.ENUM,
-        options=["boost", "silent", "unknown"],
+        options=["boost", "silent", "smart", "unknown"],
         value_fn=lambda d: HEATER_MODE_MAP.get(d.get("mode"), "unknown"),
     ),
     ZodiacSensorDescription(
-        key="reason",
-        translation_key="reason",
-        name="Reason code",
-        value_fn=lambda d: d.get("reason"),
+        key="heater_reason",
+        translation_key="heater_reason",
+        name="Heater reason",
+        device_class=SensorDeviceClass.ENUM,
+        options=["normal", "no_water_flow", "temperature_buffer", "heating", "unknown"],
+        value_fn=lambda d: HEATER_REASON_MAP.get(d.get("reason"), "unknown"),
     ),
 )
 
