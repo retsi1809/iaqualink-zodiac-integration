@@ -142,7 +142,8 @@ class ZodiacDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         await self.async_request_refresh()
 
     async def async_set_setpoint(self, setpoint: int) -> None:
-        await self._async_write({"tsp": int(setpoint)}, f"set setpoint to {setpoint}°C")
+        # The API expects temperatures as tenths of a degree (e.g. 28 °C → 280).
+        await self._async_write({"tsp": int(setpoint * 10)}, f"set setpoint to {setpoint}°C")
 
     async def async_set_mode(self, mode_int: int) -> None:
         await self._async_write({"st": int(mode_int)}, f"set mode to {mode_int}")
