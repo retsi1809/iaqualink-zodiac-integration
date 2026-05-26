@@ -1,6 +1,5 @@
 """Constants for the Zodiac iAquaLink Heat Pump integration."""
 from __future__ import annotations
-
 from datetime import timedelta
 
 DOMAIN = "zodiac_iaqualink"
@@ -34,11 +33,23 @@ HEATER_STATUS_MAP = {
 # Heater mode (from shadow `equipment.hp_0.st`)
 HEATER_MODE_BOOST = "boost"
 HEATER_MODE_SILENT = "silent"
+HEATER_MODE_SMART = "smart"
 HEATER_MODE_MAP = {
     0: HEATER_MODE_BOOST,
     1: HEATER_MODE_SILENT,
+    2: HEATER_MODE_SMART,
 }
 HEATER_MODE_REVERSE = {v: k for k, v in HEATER_MODE_MAP.items()}
+
+# Heater reason (from shadow `equipment.hp_0.reason`)
+# Describes why the heat pump is in its current state.
+# Note: only codes observed on a Z550iQ are mapped; others fall back to "unknown".
+HEATER_REASON_MAP = {
+    0: "normal",
+    1: "no_water_flow",
+    3: "temperature_buffer",
+    6: "heating",
+}
 
 # Setpoint bounds (Zodiac Z400iQ supports 8 - 32 °C)
 MIN_TEMP_C = 8
