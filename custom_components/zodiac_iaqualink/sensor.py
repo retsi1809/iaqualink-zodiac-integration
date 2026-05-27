@@ -69,6 +69,13 @@ SENSORS: tuple[ZodiacSensorDescription, ...] = (
         value_fn=lambda d: HEATER_MODE_MAP.get(d.get("mode"), "unknown"),
     ),
     ZodiacSensorDescription(
+        key="fan_speed",
+        translation_key="fan_speed",
+        name="Fan speed",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: d.get("fan"),
+    ),
+    ZodiacSensorDescription(
         key="reason",
         translation_key="reason",
         name="Reason code",
