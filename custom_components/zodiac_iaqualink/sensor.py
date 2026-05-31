@@ -103,8 +103,8 @@ SENSORS: tuple[ZodiacSensorDescription, ...] = (
         value_fn=lambda d: d.get("status"),
     ),
     ZodiacSensorDescription(
-        key="reason_code",
-        translation_key="reason_code",
+        key="reason",
+        translation_key="reason",
         name="Reason code",
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda d: d.get("reason"),
