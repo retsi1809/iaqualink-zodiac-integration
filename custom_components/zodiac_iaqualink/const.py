@@ -24,6 +24,8 @@ CONF_SERIAL = "serial"
 EQUIPMENT_KEY = "hp_0"
 
 # Heater status (from shadow `equipment.hp_0.status`)
+# Note: heater_status in sensor.py also considers reason_code for a more
+# accurate representation (e.g. no_water_flow overrides temp_buffer).
 HEATER_STATUS_MAP = {
     0: "off",
     1: "temp_buffer",
@@ -41,9 +43,9 @@ HEATER_MODE_MAP = {
 }
 HEATER_MODE_REVERSE = {v: k for k, v in HEATER_MODE_MAP.items()}
 
-# Heater reason (from shadow `equipment.hp_0.reason`)
-# Describes why the heat pump is in its current state.
-# Note: only codes observed on a Z550iQ are mapped; others fall back to "unknown".
+# Heater reason codes (from shadow `equipment.hp_0.reason`)
+# Documents known reason codes observed on a Z550iQ.
+# Used in sensor.py to refine heater_status.
 HEATER_REASON_MAP = {
     0: "normal",
     1: "no_water_flow",
