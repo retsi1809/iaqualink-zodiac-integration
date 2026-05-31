@@ -13,7 +13,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from .const import DOMAIN, HEATER_MODE_MAP, HEATER_REASON_MAP, HEATER_STATUS_MAP
+from .const import DOMAIN, HEATER_MODE_MAP, HEATER_STATUS_MAP
 from .coordinator import ZodiacDataUpdateCoordinator
 from .entity import ZodiacBaseEntity
 
@@ -22,6 +22,26 @@ from .entity import ZodiacBaseEntity
 class ZodiacSensorDescription(SensorEntityDescription):
     """Sensor description plus a value extractor against coordinator.data."""
     value_fn: Callable[[dict[str, Any]], Any]
+
+
+def _heater_status(d: dict[str, Any]) -> str:
+    """Derive a human-readable heater status from status_code and reason_code.
+
+    reason_code 1 (no water flow) takes precedence over the raw status_code
+    so that a pump-off condition is clearly visible rather than showing
+    the misleading 'temp_buffer' state.
+    """
+    status = d.get("status")
+    reason = d.get("reason")
+    if status == 0:
+        return "off"
+    if status == 1:
+        if reason == 1:
+            return "no_water_flow"
+        return "temp_buffer"
+    if status == 2:
+        return "heating"
+    return "unknown"
 
 
 SENSORS: tuple[ZodiacSensorDescription, ...] = (
@@ -57,8 +77,8 @@ SENSORS: tuple[ZodiacSensorDescription, ...] = (
         translation_key="heater_status",
         name="Heater status",
         device_class=SensorDeviceClass.ENUM,
-        options=["off", "temp_buffer", "heating", "unknown"],
-        value_fn=lambda d: HEATER_STATUS_MAP.get(d.get("status"), "unknown"),
+        options=["off", "temp_buffer", "heating", "no_water_flow", "unknown"],
+        value_fn=_heater_status,
     ),
     ZodiacSensorDescription(
         key="heater_mode",
@@ -76,18 +96,18 @@ SENSORS: tuple[ZodiacSensorDescription, ...] = (
         value_fn=lambda d: d.get("fan"),
     ),
     ZodiacSensorDescription(
-        key="reason",
-        translation_key="reason",
-        name="Reason code",
-        value_fn=lambda d: d.get("reason"),
+        key="status_code",
+        translation_key="status_code",
+        name="Status code",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: d.get("status"),
     ),
     ZodiacSensorDescription(
-        key="heater_reason",
-        translation_key="heater_reason",
-        name="Heater reason",
-        device_class=SensorDeviceClass.ENUM,
-        options=["normal", "no_water_flow", "temperature_buffer", "heating", "unknown"],
-        value_fn=lambda d: HEATER_REASON_MAP.get(d.get("reason"), "unknown"),
+        key="reason_code",
+        translation_key="reason_code",
+        name="Reason code",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: d.get("reason"),
     ),
 )
 
